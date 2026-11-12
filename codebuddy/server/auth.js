@@ -6,37 +6,33 @@ import { one } from './db.js';
 import { h, fail, clean } from './util.js';
 
 const SECRET = () => process.env.JWT_SECRET || 'dev-only-secret-change-me';
-const ADMIN_EMAILS = () =>
-  (process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
-
 export const signToken = (user) => jwt.sign({ id: user.id }, SECRET(), { expiresIn: '7d' });
 export const verifyToken = (token) => jwt.verify(token, SECRET());
 
-export const PROFILE_COLS = `id, name, email, role, bio, xp, streak_count, streak_best, streak_last,
-  questions, solved, quizzes, posts, created_at`;
+export const PROFILE_COLS = `id, name, email, bio, xp, streak_count, streak_best, streak_last,
+  questions, solved, quizzes, created_at`;
 
 export const toProfile = (u) =>
   u && {
     id: u.id,
     name: u.name,
     email: u.email,
-    role: u.role,
     bio: u.bio,
     xp: u.xp,
     streak: { count: u.streak_count, best: u.streak_best, last: u.streak_last },
-    stats: { questions: u.questions, solved: u.solved, quizzes: u.quizzes, posts: u.posts },
+    stats: { questions: u.questions, solved: u.solved, quizzes: u.quizzes },
     createdAt: u.created_at,
   };
 
 // ---------- Authentication middleware: who are you? ----------
+// (Authorization – what you may do – is handled per project by owner/editor/viewer roles.)
 export async function requireAuth(req, res, next) {
   try {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return res.status(401).json({ error: 'Please log in first.' });
     const { id } = verifyToken(token);
-    // Role is always read fresh from the DB, so role changes apply immediately
-    const user = await one('select id, name, email, role from users where id = $1', [id]);
+    const user = await one('select id, name, email from users where id = $1', [id]);
     if (!user) return res.status(401).json({ error: 'Account not found.' });
     req.user = user;
     next();
@@ -44,10 +40,6 @@ export async function requireAuth(req, res, next) {
     res.status(401).json({ error: 'Session expired. Please log in again.' });
   }
 }
-
-// ---------- Authorization middleware: are you allowed? (RBAC) ----------
-export const requireRole = (...roles) => (req, res, next) =>
-  roles.includes(req.user?.role) ? next() : res.status(403).json({ error: 'You do not have permission to do that.' });
 
 // ---------- Routes ----------
 export const authRouter = Router();
@@ -67,10 +59,9 @@ authRouter.post(
     if (await one('select 1 from users where email = $1', [email])) fail(409, 'An account with this email already exists.');
 
     const hash = await bcrypt.hash(password, 10); // passwords are never stored in plain text
-    const role = ADMIN_EMAILS().includes(email) ? 'admin' : 'student';
     const user = await one(
-      `insert into users (name, email, password_hash, role) values ($1, $2, $3, $4) returning ${PROFILE_COLS}`,
-      [name, email, hash, role]
+      `insert into users (name, email, password_hash) values ($1, $2, $3) returning ${PROFILE_COLS}`,
+      [name, email, hash]
     );
     return { token: signToken(user), user: toProfile(user) };
   })

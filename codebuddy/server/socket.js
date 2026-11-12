@@ -1,13 +1,12 @@
 import { Server } from 'socket.io';
 import { one, q } from './db.js';
 import { verifyToken } from './auth.js';
-import { ROOM_IDS } from './util.js';
 
 let io = null;
-const online = new Map(); // userId -> { id, name, role, sockets }
+const online = new Map(); // userId -> { id, name, sockets }
 
 export const emitTo = (room, event, data) => io?.to(room).emit(event, data);
-export const onlineUsers = () => [...online.values()].map(({ id, name, role }) => ({ id, name, role }));
+export const onlineUsers = () => [...online.values()].map(({ id, name }) => ({ id, name }));
 const broadcastPresence = () => io?.emit('presence', onlineUsers());
 
 export async function projectRole(projectId, userId) {
@@ -22,7 +21,7 @@ export function initSocket(server) {
   io.use(async (socket, next) => {
     try {
       const { id } = verifyToken(socket.handshake.auth?.token);
-      const user = await one('select id, name, role from users where id = $1', [id]);
+      const user = await one('select id, name from users where id = $1', [id]);
       if (!user) throw new Error();
       socket.user = user;
       next();
@@ -39,15 +38,13 @@ export function initSocket(server) {
     online.set(u.id, entry);
     broadcastPresence();
 
+    // Join a project's live channel (members only)
     socket.on('join', async ({ type, id } = {}, ack) => {
       try {
         if (type === 'project') {
           const pid = Number(id);
           if (!(await projectRole(pid, u.id))) throw new Error('Not a member');
           socket.join(`project:${pid}`);
-        } else if (type === 'room') {
-          if (!ROOM_IDS.includes(id)) throw new Error('Unknown room');
-          socket.join(`room:${id}`);
         }
         ack?.({ ok: true });
       } catch (e) {

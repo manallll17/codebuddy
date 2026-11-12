@@ -6,7 +6,6 @@ create table if not exists users (
   name          text not null,
   email         text not null unique,
   password_hash text not null,
-  role          text not null default 'student' check (role in ('student', 'mentor', 'admin')),
   bio           text not null default '',
   xp            int  not null default 0,
   streak_count  int  not null default 0,
@@ -15,7 +14,6 @@ create table if not exists users (
   questions     int  not null default 0,
   solved        int  not null default 0,
   quizzes       int  not null default 0,
-  posts         int  not null default 0,
   created_at    timestamptz not null default now(),
   last_seen     timestamptz not null default now()
 );
@@ -88,15 +86,6 @@ create table if not exists chat_messages (
 );
 create index if not exists chat_messages_chat_idx on chat_messages (chat_id, id);
 
-create table if not exists notes (
-  id         serial primary key,
-  user_id    int  not null references users(id) on delete cascade,
-  title      text not null default '',
-  content    text not null,
-  source     text not null default 'AI Tutor',
-  created_at timestamptz not null default now()
-);
-
 -- ---------- Collaborative projects ----------
 create table if not exists projects (
   id          serial primary key,
@@ -156,20 +145,3 @@ create table if not exists project_activity (
   created_at timestamptz not null default now()
 );
 create index if not exists project_activity_idx on project_activity (project_id, id desc);
-
--- ---------- Community rooms ----------
-create table if not exists room_messages (
-  id              serial primary key,
-  room            text not null,
-  user_id         int  not null references users(id) on delete cascade,
-  text            text not null,
-  shared_question text,
-  created_at      timestamptz not null default now()
-);
-create index if not exists room_messages_idx on room_messages (room, id);
-
-create table if not exists room_upvotes (
-  message_id int not null references room_messages(id) on delete cascade,
-  user_id    int not null references users(id) on delete cascade,
-  primary key (message_id, user_id)
-);

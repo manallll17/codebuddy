@@ -4,7 +4,7 @@ import { h, fail, clean, pickLang, pickLevel, intId, dayStr, LANG_LABEL, TZ } fr
 import { gemini } from '../ai.js';
 import { quizPrompt, dailyPrompt, checkPrompt } from '../prompts.js';
 import { awardXp, XP } from '../xp.js';
-import { PROFILE_COLS, toProfile, requireRole } from '../auth.js';
+import { PROFILE_COLS, toProfile } from '../auth.js';
 
 export const learnRouter = Router();
 
@@ -116,7 +116,7 @@ learnRouter.post(
   })
 );
 
-// ---------- Roadmaps ----------
+// ---------- Learning paths ----------
 learnRouter.post(
   '/roadmap/toggle',
   h(async (req) => {
@@ -129,7 +129,7 @@ learnRouter.post(
     );
     if (!removed) {
       await q('insert into roadmap_progress (user_id, language, topic_id) values ($1,$2,$3)', [req.user.id, language, topicId]);
-      await awardXp(req.user.id, XP.roadmap, { reason: 'Roadmap topic', language });
+      await awardXp(req.user.id, XP.path, { reason: 'Learning path topic', language });
     }
     return { done: !removed };
   })
@@ -140,71 +140,13 @@ learnRouter.get(
   '/leaderboard',
   h(async (req) => {
     if (req.query.period === 'all') {
-      return q(`select id, name, role, xp, streak_count as streak from users order by xp desc, id limit 25`);
+      return q(`select id, name, xp, streak_count as streak from users order by xp desc, id limit 25`);
     }
     return q(
-      `select u.id, u.name, u.role, sum(e.amount)::int as xp, u.streak_count as streak
+      `select u.id, u.name, sum(e.amount)::int as xp, u.streak_count as streak
        from xp_events e join users u on u.id = e.user_id
        where e.created_at >= date_trunc('week', now())
        group by u.id order by xp desc limit 25`
     );
   })
-);
-
-// ---------- Bookmarked notes (CRUD) ----------
-learnRouter.get(
-  '/notes',
-  h(async (req) => q('select id, title, content, source, created_at as "createdAt" from notes where user_id = $1 order by id desc', [req.user.id]))
-);
-
-learnRouter.post(
-  '/notes',
-  h(async (req) => {
-    const content = clean(req.body.content, 20000);
-    if (!content) fail(400, 'Nothing to save.');
-    return one(
-      'insert into notes (user_id, title, content, source) values ($1,$2,$3,$4) returning id, title, content, source, created_at as "createdAt"',
-      [req.user.id, clean(req.body.title, 120), content, clean(req.body.source, 40) || 'AI Tutor']
-    );
-  })
-);
-
-learnRouter.delete(
-  '/notes/:id',
-  h(async (req) => {
-    await q('delete from notes where id = $1 and user_id = $2', [intId(req.params.id), req.user.id]);
-  })
-);
-
-// ---------- Admin (RBAC: admin only) ----------
-learnRouter.get(
-  '/admin/users',
-  requireRole('admin'),
-  h(async () =>
-    q(`select id, name, email, role, xp, questions, posts, created_at as "createdAt", last_seen as "lastSeen" from users order by id`)
-  )
-);
-
-learnRouter.put(
-  '/admin/users/:id/role',
-  requireRole('admin'),
-  h(async (req) => {
-    const id = intId(req.params.id);
-    const role = req.body.role;
-    if (!['student', 'mentor', 'admin'].includes(role)) fail(400, 'Invalid role');
-    if (id === req.user.id) fail(400, "You can't change your own role.");
-    const row = await one('update users set role = $1 where id = $2 returning id, role', [role, id]);
-    if (!row) fail(404, 'User not found');
-    return row;
-  })
-);
-
-learnRouter.get(
-  '/admin/overview',
-  requireRole('admin'),
-  h(async () =>
-    one(`select (select count(*)::int from users) as users, (select count(*)::int from projects) as projects,
-      (select count(*)::int from chat_messages where role = 'user') as questions,
-      (select count(*)::int from room_messages) as posts`)
-  )
 );

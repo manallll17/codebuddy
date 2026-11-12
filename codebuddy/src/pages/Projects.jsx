@@ -8,6 +8,7 @@ import { useSocketEvent } from '../context/SocketContext';
 import Modal, { Empty } from '../components/Modal';
 import Spinner from '../components/Spinner';
 import { RoleBadge } from '../components/Avatar';
+import { FolderOpen, Plus, Users, Bot } from 'lucide-react';
 
 export default function Projects() {
   const [projects, setProjects] = useState(null);
@@ -22,11 +23,11 @@ export default function Projects() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>👥 Team Projects</h1>
+          <h1>Team Projects</h1>
           <p className="muted">Create a project, invite teammates, ask AI together and discuss changes in real time.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setCreating(true)}>
-          + New project
+          <Plus size={16} /> New project
         </button>
       </div>
 
@@ -40,7 +41,7 @@ export default function Projects() {
 
       {!projects && <Spinner />}
       {projects?.length === 0 && (
-        <Empty icon="📁" title="No projects yet">
+        <Empty icon={FolderOpen} title="No projects yet">
           Start one for your assignment or mini-project and invite your teammates by email.
         </Empty>
       )}
@@ -54,8 +55,8 @@ export default function Projects() {
             <h3>{p.name}</h3>
             <p className="muted clamp-2">{p.description || 'No description'}</p>
             <div className="row between small muted">
-              <span>
-                👤 {p.memberCount} member{p.memberCount === 1 ? '' : 's'} · 🤖 {p.aiCount} AI answers
+              <span className="row gap-sm">
+                <Users size={13} /> {p.memberCount} member{p.memberCount === 1 ? '' : 's'} <Bot size={13} /> {p.aiCount} AI answers
               </span>
               <span>{timeAgo(p.createdAt)}</span>
             </div>

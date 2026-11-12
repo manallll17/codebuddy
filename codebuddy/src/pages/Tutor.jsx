@@ -3,10 +3,11 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 import { useSettings } from '../context/SettingsContext';
-import { LANGUAGES, LEVELS, MODES, ROOMS, CODE_EXTENSIONS, langFromFile, langById } from '../lib/constants';
+import { LANGUAGES, LEVELS, MODES, CODE_EXTENSIONS, langFromFile, langById } from '../lib/constants';
 import { cleanText, copy, readFileText, timeAgo } from '../lib/utils';
 import Markdown from '../components/Markdown';
-import Modal, { Empty } from '../components/Modal';
+import { Empty } from '../components/Modal';
+import { Bot, Plus, Trash2, History, Paperclip, Send, Copy, Baby } from 'lucide-react';
 import { TypingDots } from '../components/Spinner';
 
 const SUGGESTIONS = [
@@ -29,7 +30,6 @@ export default function Tutor() {
   const [busy, setBusy] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [share, setShare] = useState(null);
   const bottomRef = useRef(null);
   const fileRef = useRef(null);
   const autoSent = useRef(false);
@@ -116,16 +116,6 @@ export default function Tutor() {
     }
   };
 
-  const bookmark = async (msg, i) => {
-    const question = messages[i - 1]?.content || '';
-    try {
-      await api.post('/notes', { title: question.slice(0, 100), content: msg.content, source: 'AI Tutor' });
-      toast.success('Saved to Notes 🔖');
-    } catch (e) {
-      toast.error(e.message);
-    }
-  };
-
   const removeChat = async (id) => {
     if (!confirm('Delete this conversation?')) return;
     await api.del(`/tutor/chats/${id}`).catch((e) => toast.error(e.message));
@@ -142,7 +132,7 @@ export default function Tutor() {
     <div className="tutor">
       <aside className={`history ${showHistory ? 'open' : ''}`}>
         <button className="btn btn-primary btn-block" onClick={() => navigate('/tutor')}>
-          + New chat
+          <Plus size={16} /> New chat
         </button>
         <div className="history-list">
           {chats.length === 0 && <p className="muted small center">Your conversations will appear here.</p>}
@@ -162,7 +152,7 @@ export default function Tutor() {
                 }}
                 title="Delete"
               >
-                🗑
+                <Trash2 size={14} />
               </button>
             </div>
           ))}
@@ -172,7 +162,7 @@ export default function Tutor() {
       <section className="chat-panel">
         <div className="chat-toolbar">
           <button className="btn btn-ghost btn-sm history-toggle" onClick={() => setShowHistory((v) => !v)}>
-            🕘 History
+            <History size={15} /> History
           </button>
           <select value={language} onChange={(e) => setLanguage(e.target.value)} aria-label="Language">
             {LANGUAGES.map((l) => (
@@ -191,21 +181,24 @@ export default function Tutor() {
           <label className="toggle" title="Explain like I'm 5">
             <input type="checkbox" checked={eli5} onChange={(e) => setEli5(e.target.checked)} />
             <span className="toggle-track" />
-            🧒 ELI5
+            ELI5
           </label>
         </div>
 
         <div className="messages">
           {loadingChat && <TypingDots />}
           {!loadingChat && messages.length === 0 && (
-            <Empty icon="🤖" title="Hi! I'm CodeBuddy, your AI programming tutor.">
+            <Empty icon={Bot} title="Hi! I'm CodeBuddy, your AI programming tutor.">
               Ask me to explain a concept, debug your code, walk through it line by line, optimise it, or give you a practice question.
               <span className="suggestions">
-                {SUGGESTIONS.map((s) => (
-                  <button key={s.text} className="suggestion" onClick={() => send(s.text, s.mode)}>
-                    {MODES.find((m) => m.id === s.mode).label.split(' ')[0]} {s.text}
-                  </button>
-                ))}
+                {SUGGESTIONS.map((s) => {
+                  const M = MODES.find((m) => m.id === s.mode);
+                  return (
+                    <button key={s.text} className="suggestion" onClick={() => send(s.text, s.mode)}>
+                      <M.icon size={14} /> {s.text}
+                    </button>
+                  );
+                })}
               </span>
             </Empty>
           )}
@@ -217,14 +210,18 @@ export default function Tutor() {
               </div>
             ) : (
               <div key={m.id} className="msg ai">
-                <div className="msg-avatar">🤖</div>
+                <div className="msg-avatar">
+                  <Bot size={18} />
+                </div>
                 <div className="msg-body">
                   <Markdown onOpenCode={openInEditor}>{m.content}</Markdown>
                   <div className="msg-actions">
-                    <button onClick={async () => toast.success((await copy(m.content)) ? 'Copied' : 'Copy failed')}>📋 Copy</button>
-                    <button onClick={() => bookmark(m, i)}>🔖 Save</button>
-                    <button onClick={() => setShare({ answer: m.content, question: messages[i - 1]?.content || '' })}>📣 Share</button>
-                    <button onClick={() => send(`Explain your previous answer like I'm 5.`, 'chat')}>🧒 Simpler</button>
+                    <button onClick={async () => toast.success((await copy(m.content)) ? 'Copied' : 'Copy failed')}>
+                      <Copy size={13} /> Copy
+                    </button>
+                    <button onClick={() => send(`Explain your previous answer like I'm 5.`, 'chat')}>
+                      <Baby size={13} /> Explain simpler
+                    </button>
                   </div>
                 </div>
               </div>
@@ -232,7 +229,9 @@ export default function Tutor() {
           )}
           {busy && (
             <div className="msg ai">
-              <div className="msg-avatar">🤖</div>
+              <div className="msg-avatar">
+                <Bot size={18} />
+              </div>
               <div className="msg-body thinking">
                 CodeBuddy is thinking <TypingDots />
               </div>
@@ -245,7 +244,7 @@ export default function Tutor() {
           <div className="mode-chips">
             {MODES.map((m) => (
               <button key={m.id} className={`chip-btn ${mode === m.id ? 'active' : ''}`} onClick={() => setMode(m.id)}>
-                {m.label}
+                <m.icon size={14} /> {m.label}
               </button>
             ))}
           </div>
@@ -265,59 +264,17 @@ export default function Tutor() {
             <div className="composer-actions">
               <input ref={fileRef} type="file" accept={CODE_EXTENSIONS} hidden onChange={onUpload} />
               <button className="btn btn-ghost btn-sm" onClick={() => fileRef.current.click()} title="Upload a code file">
-                📎 Upload code
+                <Paperclip size={14} /> Upload code
               </button>
               <span className="muted small hide-sm">Enter to send · Shift+Enter for new line</span>
               <button className="btn btn-primary" onClick={() => send()} disabled={busy || !input.trim()}>
-                {busy ? '…' : 'Send ➤'}
+                {busy ? '…' : <>Send <Send size={14} /></>}
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {share && <ShareModal data={share} defaultRoom={language} onClose={() => setShare(null)} />}
     </div>
-  );
-}
-
-export function ShareModal({ data, defaultRoom, onClose }) {
-  const [room, setRoom] = useState(ROOMS.some((r) => r.id === defaultRoom) ? defaultRoom : 'general');
-  const [note, setNote] = useState('');
-  const navigate = useNavigate();
-  const submit = async () => {
-    try {
-      const text = `${note ? note + '\n\n' : ''}${data.answer}`;
-      await api.post(`/community/rooms/${room}/messages`, { text, sharedQuestion: data.question.slice(0, 500) });
-      toast.success('Shared to community');
-      onClose();
-      navigate(`/community/${room}`);
-    } catch (e) {
-      toast.error(e.message);
-    }
-  };
-  return (
-    <Modal title="📣 Share AI answer to community" onClose={onClose}>
-      <div className="stack">
-        <label>
-          Room
-          <select value={room} onChange={(e) => setRoom(e.target.value)}>
-            {ROOMS.map((r) => (
-              <option key={r.id} value={r.id}>
-                #{r.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Add a note (optional)
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. This helped me understand recursion!" />
-        </label>
-        <div className="quote clamp-3">{data.question}</div>
-        <button className="btn btn-primary" onClick={submit}>
-          Share
-        </button>
-      </div>
-    </Modal>
   );
 }

@@ -2,12 +2,13 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
+import { Bot, Users, Code2, Trophy, Sun, Moon } from 'lucide-react';
 
 const FEATURES = [
-  ['🤖', 'AI tutor', 'Explain, debug and optimise code in 5 languages'],
-  ['👥', 'Team projects', 'Ask AI together and discuss in real time'],
-  ['💻', 'Run code', 'VS Code-style editor right in your browser'],
-  ['🔥', 'Stay motivated', 'Daily challenges, XP, streaks & leaderboard'],
+  [Bot, 'AI tutor', 'Explain, debug and optimise code in 5 languages'],
+  [Users, 'Team projects', 'Ask AI together and discuss in real time'],
+  [Code2, 'Run code', 'VS Code-style editor right in your browser'],
+  [Trophy, 'Stay motivated', 'Daily challenges, XP, streaks & leaderboard'],
 ];
 
 export default function AuthPage() {
@@ -24,7 +25,7 @@ export default function AuthPage() {
     try {
       if (mode === 'login') await login(form.email, form.password);
       else await signup(form.name, form.email, form.password);
-      toast.success(mode === 'login' ? 'Welcome back!' : 'Account created 🎉');
+      toast.success(mode === 'login' ? 'Welcome back!' : 'Account created');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -35,7 +36,7 @@ export default function AuthPage() {
   return (
     <div className="auth">
       <button className="icon-btn auth-theme" onClick={toggleTheme} aria-label="Toggle theme">
-        {theme === 'dark' ? '☀️' : '🌙'}
+        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
       <section className="auth-hero">
         <div className="brand big">
@@ -49,9 +50,11 @@ export default function AuthPage() {
           An AI-powered programming tutor and collaborative coding workspace for students.
         </p>
         <div className="feature-grid">
-          {FEATURES.map(([i, t, d]) => (
+          {FEATURES.map(([Icon, t, d]) => (
             <div key={t} className="feature">
-              <span>{i}</span>
+              <span className="feature-icon">
+                <Icon size={20} strokeWidth={1.8} />
+              </span>
               <div>
                 <strong>{t}</strong>
                 <small>{d}</small>
@@ -71,7 +74,7 @@ export default function AuthPage() {
           </button>
         </div>
         <form onSubmit={submit} className="stack">
-          <h2>{mode === 'login' ? 'Welcome back 👋' : 'Create your account'}</h2>
+          <h2>{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
           {mode === 'signup' && (
             <label>
               Full name

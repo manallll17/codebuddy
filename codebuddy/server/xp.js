@@ -3,8 +3,8 @@ import { dayStr } from './util.js';
 import { emitTo } from './socket.js';
 import { PROFILE_COLS, toProfile } from './auth.js';
 
-export const XP = { question: 2, projectQuestion: 2, quizCorrect: 2, daily: 20, roadmap: 5, post: 1, upvote: 2 };
-const STATS = ['questions', 'solved', 'quizzes', 'posts'];
+export const XP = { question: 2, projectQuestion: 2, quizCorrect: 2, daily: 20, path: 5 };
+const STATS = ['questions', 'solved', 'quizzes'];
 
 /**
  * Awards XP on the server (users can't fake it), updates streak, activity heatmap,

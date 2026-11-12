@@ -1,3 +1,5 @@
+import { MessageSquare, Lightbulb, Bug, ListOrdered, Gauge, Target } from 'lucide-react';
+
 export const LANGUAGES = [
   {
     id: 'python', label: 'Python', monaco: 'python', ext: ['py'],
@@ -35,22 +37,12 @@ export const LEVELS = [
 ];
 
 export const MODES = [
-  { id: 'chat', label: '💬 Ask', placeholder: 'Ask CodeBuddy anything about programming…' },
-  { id: 'explain', label: '💡 Explain', placeholder: 'Which concept should I explain? e.g. recursion' },
-  { id: 'debug', label: '🐞 Debug', placeholder: 'Paste your code (and the error message) here…' },
-  { id: 'linebyline', label: '📜 Line by line', placeholder: 'Paste code to explain line by line…' },
-  { id: 'optimize', label: '⚡ Optimise', placeholder: 'Paste code you want to make faster / cleaner…' },
-  { id: 'practice', label: '🎯 Practice', placeholder: 'Topic for a practice question, e.g. arrays' },
-];
-
-export const ROOMS = [
-  { id: 'general', label: 'general', desc: 'Say hi and chat about anything code' },
-  { id: 'doubts', label: 'doubts', desc: 'Stuck? Ask the community' },
-  { id: 'python', label: 'python', desc: 'Python help & tips' },
-  { id: 'java', label: 'java', desc: 'Java help & tips' },
-  { id: 'c', label: 'c', desc: 'C programming' },
-  { id: 'cpp', label: 'cpp', desc: 'C++ & DSA' },
-  { id: 'javascript', label: 'javascript', desc: 'JS & web dev' },
+  { id: 'chat', label: 'Ask', icon: MessageSquare, placeholder: 'Ask CodeBuddy anything about programming…' },
+  { id: 'explain', label: 'Explain', icon: Lightbulb, placeholder: 'Which concept should I explain? e.g. recursion' },
+  { id: 'debug', label: 'Debug', icon: Bug, placeholder: 'Paste your code (and the error message) here…' },
+  { id: 'linebyline', label: 'Line by line', icon: ListOrdered, placeholder: 'Paste code to explain line by line…' },
+  { id: 'optimize', label: 'Optimise', icon: Gauge, placeholder: 'Paste code you want to make faster / cleaner…' },
+  { id: 'practice', label: 'Practice', icon: Target, placeholder: 'Topic for a practice question, e.g. arrays' },
 ];
 
 const common = (lang) => [
@@ -62,7 +54,8 @@ const common = (lang) => [
   { id: 'functions', title: 'Functions', desc: 'Parameters, return values and scope' },
 ];
 
-export const ROADMAPS = {
+// Learning paths: step-by-step topics per language
+export const LEARNING_PATHS = {
   python: [...common('Python'),
     { id: 'collections', title: 'Lists, Tuples & Dicts', desc: 'Python built-in collections' },
     { id: 'strings', title: 'String Handling', desc: 'Slicing, methods and f-strings' },

@@ -22,9 +22,9 @@ export function SocketProvider({ children }) {
     s.on('connect', () => s.emit('presence:get', setOnline));
     s.on('xp', ({ amount, reason, profile }) => {
       if (profile) setUserRef.current(profile);
-      if (amount > 0) toast.success(`+${amount} XP · ${reason}`, { icon: '⚡', duration: 2000 });
+      if (amount > 0) toast.success(`+${amount} XP · ${reason}`, { duration: 2000 });
     });
-    s.on('project:invited', ({ by }) => toast(`${by} added you to a project 🎉`, { icon: '👥' }));
+    s.on('project:invited', ({ by }) => toast.success(`${by} added you to a project`));
     setSocket(s);
     return () => {
       s.disconnect();
@@ -49,7 +49,7 @@ export function useSocketEvent(event, handler) {
   }, [socket, event]);
 }
 
-/** Join a project or community room channel while mounted (re-joins after reconnect). */
+/** Join a project's live channel while mounted (re-joins after reconnect). */
 export function useChannel(type, id) {
   const { socket } = useSocket();
   useEffect(() => {

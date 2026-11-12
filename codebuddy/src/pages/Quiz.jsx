@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { useSettings } from '../context/SettingsContext';
 import { LANGUAGES, LEVELS } from '../lib/constants';
 import Spinner from '../components/Spinner';
+import { CircleCheck, CircleX, Trophy, PartyPopper, Dumbbell } from 'lucide-react';
 
 const TOPICS = ['Loops', 'Functions', 'Arrays', 'Strings', 'OOP', 'Recursion', 'Pointers', 'Sorting'];
 
@@ -61,7 +62,7 @@ export default function Quiz() {
     <div className="page narrow">
       <div className="page-head">
         <div>
-          <h1>🧠 Quiz Mode</h1>
+          <h1>Quiz Mode</h1>
           <p className="muted">5 AI-generated questions on any topic. Earn 2 XP for every correct answer.</p>
         </div>
       </div>
@@ -131,7 +132,10 @@ export default function Quiz() {
           </div>
           {picked !== null && (
             <div className={`verdict ${picked === q.answerIndex ? 'ok' : 'bad'}`}>
-              <strong>{picked === q.answerIndex ? '✅ Correct!' : '❌ Not quite'}</strong>
+              <strong className="h-ico">
+                {picked === q.answerIndex ? <CircleCheck size={17} /> : <CircleX size={17} />}
+                {picked === q.answerIndex ? 'Correct!' : 'Not quite'}
+              </strong>
               <p className="small">{q.explanation}</p>
             </div>
           )}
@@ -143,7 +147,9 @@ export default function Quiz() {
 
       {done && (
         <div className="card center stack">
-          <div className="big-emoji">{done.score === done.total ? '🏆' : done.score >= done.total / 2 ? '🎉' : '💪'}</div>
+          <div className="big-icon">
+            {done.score === done.total ? <Trophy size={44} /> : done.score >= done.total / 2 ? <PartyPopper size={44} /> : <Dumbbell size={44} />}
+          </div>
           <h2>
             You scored {done.score} / {done.total}
           </h2>

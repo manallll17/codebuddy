@@ -9,9 +9,10 @@ export default function Avatar({ name, size = 34, online }) {
   );
 }
 
-const LABELS = { mentor: '🎓 Mentor', admin: '🛡️ Admin', owner: '👑 Owner', editor: '✏️ Editor', viewer: '👁️ Viewer' };
+const LABELS = { owner: 'Owner', editor: 'Editor', viewer: 'Viewer' };
 
+// Project role badge (owner / editor / viewer)
 export function RoleBadge({ role }) {
-  if (!role || role === 'student') return null;
+  if (!LABELS[role]) return null;
   return <span className={`badge badge-${role}`}>{LABELS[role] || role}</span>;
 }

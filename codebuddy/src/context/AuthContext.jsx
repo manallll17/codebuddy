@@ -49,8 +49,6 @@ export function AuthProvider({ children }) {
     logout,
     refresh,
     setUser,
-    isAdmin: user?.role === 'admin',
-    isStaff: user?.role === 'admin' || user?.role === 'mentor',
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

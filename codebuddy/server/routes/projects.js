@@ -38,7 +38,7 @@ async function logActivity(pid, userId, text) {
 const AI_SELECT = `select m.id, m.user_id as "userId", u.name as "userName", m.question, m.answer,
   m.file_name as "fileName", m.pinned, m.created_at as "createdAt"
   from project_ai_messages m join users u on u.id = m.user_id`;
-const TEAM_SELECT = `select t.id, t.user_id as "userId", u.name as "userName", u.role as "userRole", t.text,
+const TEAM_SELECT = `select t.id, t.user_id as "userId", u.name as "userName", t.text,
   t.ref_ai_id as "refAiId", a.question as "refQuestion", t.created_at as "createdAt"
   from project_team_messages t join users u on u.id = t.user_id
   left join project_ai_messages a on a.id = t.ref_ai_id`;
@@ -47,7 +47,7 @@ const FILE_SELECT = `select f.id, f.name, f.language, f.content, f.updated_at as
 
 const membersOf = (pid) =>
   q(
-    `select u.id, u.name, u.email, u.role as "appRole", pm.role, u.last_seen as "lastSeen"
+    `select u.id, u.name, u.email, pm.role, u.last_seen as "lastSeen"
      from project_members pm join users u on u.id = pm.user_id
      where pm.project_id = $1 order by case pm.role when 'owner' then 1 when 'editor' then 2 else 3 end, u.name`,
     [pid]

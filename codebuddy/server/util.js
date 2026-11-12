@@ -34,7 +34,6 @@ export const dayStr = (offsetDays = 0) => fmt.format(new Date(Date.now() + offse
 export const LANGS = ['python', 'java', 'c', 'cpp', 'javascript'];
 export const LANG_LABEL = { python: 'Python', java: 'Java', c: 'C', cpp: 'C++', javascript: 'JavaScript' };
 export const LEVELS = ['beginner', 'intermediate', 'advanced'];
-export const ROOM_IDS = ['general', 'doubts', 'python', 'java', 'c', 'cpp', 'javascript'];
 export const pickLang = (l) => (LANGS.includes(l) ? l : 'python');
 export const pickLevel = (l) => (LEVELS.includes(l) ? l : 'beginner');
 export const intId = (v) => {

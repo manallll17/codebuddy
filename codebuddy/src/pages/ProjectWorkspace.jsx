@@ -11,6 +11,7 @@ import CodeEditor from '../components/CodeEditor';
 import Avatar, { RoleBadge } from '../components/Avatar';
 import Spinner, { TypingDots } from '../components/Spinner';
 import Modal, { Empty } from '../components/Modal';
+import { Bot, Folder, FolderOpen, Activity, Users, MessagesSquare, Pin, FileCode, Copy, Send, X, Trash2, Eye, Pencil, Plus, Sparkles } from 'lucide-react';
 
 const RANK = { viewer: 1, editor: 2, owner: 3 };
 
@@ -155,7 +156,7 @@ export default function ProjectWorkspace() {
           </small>
         </div>
         <button className="btn btn-ghost btn-sm team-toggle" onClick={() => setMobileTeam((v) => !v)}>
-          💬 Team chat
+          <MessagesSquare size={15} /> Team chat
         </button>
       </header>
 
@@ -163,13 +164,13 @@ export default function ProjectWorkspace() {
         <section className="ws-main card">
           <div className="tabs">
             {[
-              ['ai', `🤖 Shared AI chat`],
-              ['files', `📁 Files (${files.length})`],
-              ['activity', '📰 Activity'],
-              ['members', `👥 Members (${project.members.length})`],
-            ].map(([id, label]) => (
+              ['ai', Bot, 'Shared AI chat'],
+              ['files', Folder, `Files (${files.length})`],
+              ['activity', Activity, 'Activity'],
+              ['members', Users, `Members (${project.members.length})`],
+            ].map(([id, Icon, label]) => (
               <button key={id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>
-                {label}
+                <Icon size={15} /> {label}
               </button>
             ))}
           </div>
@@ -237,23 +238,18 @@ function AiPanel({ projectId, project, messages, files, canEdit, thinking, attac
   };
 
   const pin = (m) => api.put(`/projects/${projectId}/ai/${m.id}/pin`).catch((e) => toast.error(e.message));
-  const save = (m) =>
-    api
-      .post('/notes', { title: m.question.slice(0, 100), content: m.answer, source: project.name })
-      .then(() => toast.success('Saved to Notes 🔖'))
-      .catch((e) => toast.error(e.message));
 
   return (
     <div className="panel">
       <div className="row between pinned-bar">
         <span className="muted small">Everyone in the project sees these questions and answers live.</span>
         <button className={`chip-btn ${showPinned ? 'active' : ''}`} onClick={() => setShowPinned((v) => !v)}>
-          📌 Pinned ({pinned.length})
+          <Pin size={13} /> Pinned ({pinned.length})
         </button>
       </div>
       <div className="panel-scroll">
         {list.length === 0 && (
-          <Empty icon={showPinned ? '📌' : '🤖'} title={showPinned ? 'No pinned answers yet' : 'Ask the first question'}>
+          <Empty icon={showPinned ? Pin : Bot} title={showPinned ? 'No pinned answers yet' : 'Ask the first question'}>
             {showPinned ? 'Pin the best AI answers so the whole team can find them.' : 'The AI already knows your project description and language.'}
           </Empty>
         )}
@@ -264,11 +260,15 @@ function AiPanel({ projectId, project, messages, files, canEdit, thinking, attac
               <div className="grow">
                 <div className="small">
                   <strong>{m.userName}</strong> <span className="muted">asked · {timeAgo(m.createdAt)}</span>
-                  {m.fileName && <span className="badge">📄 {m.fileName}</span>}
+                  {m.fileName && (
+                    <span className="badge">
+                      <FileCode size={11} /> {m.fileName}
+                    </span>
+                  )}
                 </div>
                 <div className="question">{m.question}</div>
               </div>
-              {m.pinned && <span title="Pinned">📌</span>}
+              {m.pinned && <Pin size={16} className="pin-mark" />}
             </div>
             <div className="ai-a">
               <Markdown onOpenCode={(code, lang) => navigate('/editor', { state: { code, language: LANGUAGES.some((l) => l.id === lang) ? lang : project.language } })}>
@@ -276,16 +276,23 @@ function AiPanel({ projectId, project, messages, files, canEdit, thinking, attac
               </Markdown>
             </div>
             <div className="msg-actions">
-              <button onClick={() => onDiscuss(m)}>💬 Discuss this</button>
-              {canEdit && <button onClick={() => pin(m)}>{m.pinned ? '📌 Unpin' : '📌 Pin'}</button>}
-              <button onClick={async () => toast.success((await copy(m.answer)) ? 'Copied' : 'Copy failed')}>📋 Copy</button>
-              <button onClick={() => save(m)}>🔖 Save</button>
+              <button onClick={() => onDiscuss(m)}>
+                <MessagesSquare size={13} /> Discuss this
+              </button>
+              {canEdit && (
+                <button onClick={() => pin(m)}>
+                  <Pin size={13} /> {m.pinned ? 'Unpin' : 'Pin'}
+                </button>
+              )}
+              <button onClick={async () => toast.success((await copy(m.answer)) ? 'Copied' : 'Copy failed')}>
+                <Copy size={13} /> Copy
+              </button>
             </div>
           </article>
         ))}
         {thinking && (
           <div className="thinking-banner">
-            🤖 <strong>{thinking.userName}</strong> asked: “{thinking.question.slice(0, 80)}” <TypingDots />
+            <Bot size={15} /> <strong>{thinking.userName}</strong> asked: “{thinking.question.slice(0, 80)}” <TypingDots />
           </div>
         )}
         <div ref={bottom} />
@@ -306,21 +313,23 @@ function AiPanel({ projectId, project, messages, files, canEdit, thinking, attac
           />
           <div className="composer-actions">
             <select value={attachFileId} onChange={(e) => setAttachFileId(e.target.value)} title="Attach a project file">
-              <option value="">📎 No file attached</option>
+              <option value="">No file attached</option>
               {files.map((f) => (
                 <option key={f.id} value={f.id}>
-                  📄 {f.name}
+                  {f.name}
                 </option>
               ))}
             </select>
             <div className="grow" />
             <button className="btn btn-primary" onClick={ask} disabled={busy || !q.trim()}>
-              {busy ? 'Asking…' : 'Ask AI ➤'}
+              {busy ? 'Asking…' : <>Ask AI <Send size={14} /></>}
             </button>
           </div>
         </div>
       ) : (
-        <div className="readonly-note">👁️ You are a viewer – you can read everything and join the team chat, but only editors can ask the AI.</div>
+        <div className="readonly-note">
+          <Eye size={15} /> You are a viewer – you can read everything and join the team chat, but only editors can ask the AI.
+        </div>
       )}
     </div>
   );
@@ -350,9 +359,11 @@ function TeamChat({ projectId, messages, me, typing, onTyping, discuss, clearDis
   return (
     <aside className="team-chat card">
       <div className="row between team-head">
-        <h3>💬 Team discussion</h3>
+        <h3 className="h-ico">
+          <MessagesSquare size={17} /> Team discussion
+        </h3>
         <button className="icon-btn tiny team-close" onClick={close}>
-          ✕
+          <X size={15} />
         </button>
       </div>
       <div className="panel-scroll">
@@ -367,7 +378,7 @@ function TeamChat({ projectId, messages, me, typing, onTyping, discuss, clearDis
                 {!grouped && !own && <div className="tname">{m.userName}</div>}
                 {m.refAiId && (
                   <button className="quote" onClick={() => jumpToAi(m.refAiId)}>
-                    🤖 Re: {m.refQuestion?.slice(0, 90) || 'an AI answer'}
+                    Re: {m.refQuestion?.slice(0, 90) || 'an AI answer'}
                   </button>
                 )}
                 <div className="ttext">{m.text}</div>
@@ -387,9 +398,9 @@ function TeamChat({ projectId, messages, me, typing, onTyping, discuss, clearDis
       </div>
       {discuss && (
         <div className="discuss-chip">
-          <span className="truncate">💬 Discussing: {discuss.question}</span>
+          <span className="truncate">Discussing: {discuss.question}</span>
           <button className="icon-btn tiny" onClick={clearDiscuss}>
-            ✕
+            <X size={13} />
           </button>
         </div>
       )}
@@ -404,7 +415,7 @@ function TeamChat({ projectId, messages, me, typing, onTyping, discuss, clearDis
           placeholder={discuss ? 'What do you think about this answer?' : 'Message your team…'}
         />
         <button className="btn btn-primary btn-sm" onClick={send} disabled={!text.trim()}>
-          ➤
+          <Send size={15} />
         </button>
       </div>
     </aside>
@@ -450,19 +461,19 @@ function FilesPanel({ projectId, files, canEdit, onAsk }) {
       <div className="file-list">
         {canEdit && (
           <button className="btn btn-ghost btn-sm btn-block" onClick={() => setCreating(true)}>
-            + New file
+            <Plus size={14} /> New file
           </button>
         )}
         {files.length === 0 && <p className="muted small center">No files yet.</p>}
         {files.map((f) => (
           <button key={f.id} className={`file-item ${f.id === activeId ? 'active' : ''}`} onClick={() => open(f)}>
-            📄 <span className="truncate">{f.name}</span>
+            <FileCode size={14} /> <span className="truncate">{f.name}</span>
           </button>
         ))}
       </div>
       <div className="file-view">
         {!active ? (
-          <Empty icon="📁" title="Shared code files">
+          <Empty icon={FolderOpen} title="Shared code files">
             Keep your project's code here. Everyone can open it, and you can ask the AI about any file.
           </Empty>
         ) : (
@@ -474,12 +485,12 @@ function FilesPanel({ projectId, files, canEdit, onAsk }) {
               </small>
               <div className="grow" />
               <button className="btn btn-ghost btn-sm" onClick={() => onAsk(active.id)}>
-                🤖 Ask AI about this file
+                <Sparkles size={14} /> Ask AI about this file
               </button>
               {canEdit && (
                 <>
                   <button className="btn btn-ghost btn-sm" onClick={remove}>
-                    🗑
+                    <Trash2 size={14} />
                   </button>
                   <button className="btn btn-primary btn-sm" onClick={save} disabled={!dirty}>
                     Save
@@ -626,10 +637,10 @@ function MembersPanel({ project, isOwner, onlineIds, me }) {
               <Avatar name={m.name} size={36} online={onlineIds.has(m.id)} />
               <div className="grow">
                 <div>
-                  <strong>{m.name}</strong> {m.id === me && <span className="muted small">(you)</span>} <RoleBadge role={m.appRole} />
+                  <strong>{m.name}</strong> {m.id === me && <span className="muted small">(you)</span>}
                 </div>
                 <small className="muted">
-                  {onlineIds.has(m.id) ? '🟢 Online now' : `Last seen ${timeAgo(m.lastSeen)}`} · {m.email}
+                  {onlineIds.has(m.id) ? 'Online now' : `Last seen ${timeAgo(m.lastSeen)}`} · {m.email}
                 </small>
               </div>
               {isOwner && m.role !== 'owner' ? (
@@ -639,7 +650,7 @@ function MembersPanel({ project, isOwner, onlineIds, me }) {
                     <option value="viewer">Viewer</option>
                   </select>
                   <button className="icon-btn tiny" onClick={() => remove(m)} title="Remove">
-                    ✕
+                    <X size={14} />
                   </button>
                 </>
               ) : (
@@ -659,7 +670,7 @@ function MembersPanel({ project, isOwner, onlineIds, me }) {
           {isOwner ? (
             <>
               <button className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>
-                ✏️ Edit details
+                <Pencil size={13} /> Edit details
               </button>
               <button className="btn btn-danger btn-sm" onClick={deleteProject}>
                 Delete project

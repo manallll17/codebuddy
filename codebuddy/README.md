@@ -8,7 +8,7 @@
 
 **Account & Profile**
 - Sign up / log in with our own authentication: bcrypt-hashed passwords and JWT tokens
-- Roles: Student, Mentor, Admin (RBAC)
+- Every user is a student; no admin accounts
 - Profile page with stats, an activity calendar and a languages-used chart
 - Dark / light mode (Context API)
 
@@ -18,8 +18,7 @@
 - Quick actions: Explain, Debug, Line-by-line, Optimise, Practice question
 - "Explain like I'm 5" toggle
 - Code file upload for analysis
-- Saved chat history, plus bookmarks in a Notes page
-- Share an AI answer to the community
+- Saved chat history
 
 **Code Editor**
 - Monaco (VS Code) editor with syntax highlighting
@@ -36,15 +35,10 @@
 - The AI uses the project description as context
 - Live activity feed
 
-**Community**
-- Public rooms: #general, #doubts, #python, #java, #c, #cpp, #javascript
-- Real-time messages, online users list
-- Upvotes (the author earns +2 XP), mentor/admin badges, moderation
-
 **Learning & Gamification**
 - Daily coding challenge, AI-checked (+20 XP)
 - Quiz mode (5 AI-generated MCQs)
-- Learning roadmaps with progress
+- Learning Paths (step-by-step topics per language) with progress
 - XP, levels, 🔥 daily streaks
 - Weekly and all-time leaderboard
 - Charts on the dashboard and profile (Recharts)
@@ -72,14 +66,14 @@ Browser (React) ──REST /api──▶ Express ──SQL──▶ Supabase Pos
 ```
 
 ### Security (Unit 4)
-- **Authentication vs Authorization**: `requireAuth` checks *who you are* (JWT); `requireRole` and project roles check *what you may do* (RBAC).
+- **Authentication vs Authorization**: `requireAuth` checks *who you are* (JWT); project roles (Owner / Editor / Viewer) check *what you may do* inside a team project (RBAC).
 - **SQL Injection**: every query uses parameterised SQL (`$1, $2`); user input is never concatenated into SQL.
 - **XSS**: React escapes all text, and Markdown is rendered with raw HTML disabled (`skipHtml`). Input is sanitised and length-limited on the server.
 - **CSRF**: the JWT is sent in the `Authorization` header, not a cookie, so other sites can't make requests as the user.
 - Passwords hashed with bcrypt, Helmet security headers, rate limiting on login and AI routes, and API keys kept only on the server.
 
 ### Database tables
-`users`, `chats`, `chat_messages`, `notes`, `projects`, `project_members`, `project_ai_messages`, `project_team_messages`, `project_files`, `project_activity`, `room_messages`, `room_upvotes`, `xp_events`, `activity_log`, `language_usage`, `roadmap_progress`, `daily_challenges`, `daily_solves` (see `db/schema.sql`). Tables are created automatically when the server starts.
+`users`, `chats`, `chat_messages`, `projects`, `project_members`, `project_ai_messages`, `project_team_messages`, `project_files`, `project_activity`, `xp_events`, `activity_log`, `language_usage`, `roadmap_progress`, `daily_challenges`, `daily_solves` (see `db/schema.sql`). Tables are created automatically when the server starts.
 
 ---
 
@@ -124,12 +118,11 @@ Browser (React) ──REST /api──▶ Express ──SQL──▶ Supabase Pos
    | `DATABASE_URL` | your Supabase session pooler URI |
    | `GEMINI_API_KEY` | your Gemini key |
    | `JWT_SECRET` | any long random text, e.g. `cb-9f8a7d6s5a4-secret-2026` |
-   | `ADMIN_EMAILS` | the email you'll sign up with (becomes Admin) |
-   | `GEMINI_MODEL` | `gemini-flash-latest` |
+      | `GEMINI_MODEL` | `gemini-flash-lite-latest` |
    | `APP_TZ` | `Asia/Kolkata` |
 
 4. Click **Create Web Service**. After 2–4 minutes you get a URL like `https://codebuddy-xxxx.onrender.com`. **This is the URL for your report and Excel sheet.**
-5. Open it, sign up with the email you put in `ADMIN_EMAILS`, and you're the admin.
+5. Open it and sign up.
 
 > Render's free tier sleeps after 15 min idle, so the first visit can take about 50 s. Open the site once before your demo/viva.
 > Supabase pauses free projects after 7 days of no activity. Open the Supabase dashboard before your demo if it's been a while.
@@ -150,7 +143,6 @@ npm run dev                 # React on http://localhost:5173, API on :5000
 | AI says "AI is not configured" | Add `GEMINI_API_KEY` in Render → Environment, then redeploy. |
 | "AI is busy (free-tier limit)" | Gemini free tier allows a limited number of requests per minute; wait a minute. |
 | Code runner unavailable | The free public Judge0 server is busy; try again. |
-| Want another admin | Admin panel → change their role, or add their email to `ADMIN_EMAILS` before they sign up. |
 
 ---
 
@@ -160,16 +152,16 @@ codebuddy/
 ├── db/schema.sql            PostgreSQL tables
 ├── server/
 │   ├── index.js             Express app, security middleware, static hosting
-│   ├── auth.js              Signup/login, JWT, requireAuth, requireRole (RBAC)
-│   ├── socket.js            Socket.io: presence, rooms, typing
+│   ├── auth.js              Signup/login, JWT, requireAuth
+│   ├── socket.js            Socket.io: presence, project channels, typing
 │   ├── ai.js / prompts.js   Gemini integration and tutor prompts
 │   ├── xp.js                XP, streaks, leaderboard
-│   └── routes/              tutor, projects, community, learn (REST API)
+│   └── routes/              tutor, projects (with Owner/Editor/Viewer RBAC), learn (REST API)
 ├── src/
 │   ├── context/             AuthContext, SettingsContext, SocketContext (global state)
 │   ├── components/          Layout, CodeEditor, Markdown, Avatar, Modal
 │   ├── pages/               Dashboard, Tutor, Playground, Projects, ProjectWorkspace,
-│   │                        Community, Quiz, Roadmaps, Leaderboard, Notes, Profile, Admin
+│   │                        Quiz, LearningPaths, Leaderboard, Profile
 │   └── lib/                 api client, constants, helpers
 └── render.yaml              Render deployment blueprint
 ```

@@ -10,24 +10,17 @@ const Tutor = lazy(() => import('./pages/Tutor'));
 const Playground = lazy(() => import('./pages/Playground'));
 const Projects = lazy(() => import('./pages/Projects'));
 const ProjectWorkspace = lazy(() => import('./pages/ProjectWorkspace'));
-const Community = lazy(() => import('./pages/Community'));
 const Quiz = lazy(() => import('./pages/Quiz'));
-const Roadmaps = lazy(() => import('./pages/Roadmaps'));
+const LearningPaths = lazy(() => import('./pages/LearningPaths'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
-const Notes = lazy(() => import('./pages/Notes'));
 const Profile = lazy(() => import('./pages/Profile'));
-const Admin = lazy(() => import('./pages/Admin'));
 
-// Route guards: authentication (logged in?) and authorization (admin?)
+// Route guard: only logged-in students can open the app
 function Protected({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <Spinner full />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
-}
-function AdminOnly({ children }) {
-  const { isAdmin } = useAuth();
-  return isAdmin ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -43,14 +36,10 @@ export default function App() {
           <Route path="editor" element={<Playground />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:projectId" element={<ProjectWorkspace />} />
-          <Route path="community" element={<Community />} />
-          <Route path="community/:roomId" element={<Community />} />
           <Route path="quiz" element={<Quiz />} />
-          <Route path="roadmaps" element={<Roadmaps />} />
+          <Route path="learning-paths" element={<LearningPaths />} />
           <Route path="leaderboard" element={<Leaderboard />} />
-          <Route path="notes" element={<Notes />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="admin" element={<AdminOnly><Admin /></AdminOnly>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

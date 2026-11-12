@@ -6,6 +6,7 @@ import { api } from '../lib/api';
 import { dateKey, daysAgo, levelFromXp } from '../lib/utils';
 import Spinner from '../components/Spinner';
 import Avatar from '../components/Avatar';
+import { Zap, Flame, MessageCircleQuestion, CircleCheck, Target, TrendingUp, Rocket, Trophy, Bot, Code2, Users, Brain, Map, User, ArrowRight } from 'lucide-react';
 
 function greeting() {
   const h = new Date().getHours();
@@ -36,10 +37,10 @@ export default function Dashboard() {
   });
 
   const cards = [
-    { icon: '⚡', label: 'Total XP', value: user.xp, sub: `Level ${lvl.level}` },
-    { icon: '🔥', label: 'Streak', value: `${user.streak?.count || 0}d`, sub: `Best ${user.streak?.best || 0} days` },
-    { icon: '❓', label: 'Questions asked', value: user.stats.questions, sub: 'to CodeBuddy' },
-    { icon: '✅', label: 'Challenges solved', value: user.stats.solved, sub: `${user.stats.quizzes} quizzes taken` },
+    { icon: Zap, label: 'Total XP', value: user.xp, sub: `Level ${lvl.level}` },
+    { icon: Flame, label: 'Streak', value: `${user.streak?.count || 0}d`, sub: `Best ${user.streak?.best || 0} days` },
+    { icon: MessageCircleQuestion, label: 'Questions asked', value: user.stats.questions, sub: 'to CodeBuddy' },
+    { icon: CircleCheck, label: 'Challenges solved', value: user.stats.solved, sub: `${user.stats.quizzes} quizzes taken` },
   ];
 
   return (
@@ -47,7 +48,7 @@ export default function Dashboard() {
       <div className="page-head">
         <div>
           <h1>
-            {greeting()}, {user.name.split(' ')[0]} 👋
+            {greeting()}, {user.name.split(' ')[0]}
           </h1>
           <p className="muted">Ready to level up your coding today?</p>
         </div>
@@ -65,7 +66,9 @@ export default function Dashboard() {
       <div className="stat-grid">
         {cards.map((c) => (
           <div key={c.label} className="card stat">
-            <span className="stat-icon">{c.icon}</span>
+            <span className="stat-icon">
+              <c.icon size={22} strokeWidth={1.8} />
+            </span>
             <div>
               <div className="stat-value">{c.value}</div>
               <div className="stat-label">{c.label}</div>
@@ -78,8 +81,10 @@ export default function Dashboard() {
       <div className="grid-2">
         <div className="card daily">
           <div className="row between">
-            <h2>🎯 Daily Challenge</h2>
-            {daily?.solved && <span className="badge badge-success">Solved ✓</span>}
+            <h2 className="h-ico">
+              <Target size={18} /> Daily Challenge
+            </h2>
+            {daily?.solved && <span className="badge badge-success">Solved</span>}
           </div>
           {!daily && !dailyErr && <Spinner label="Generating today's challenge…" />}
           {dailyErr && <p className="error-text">{dailyErr}</p>}
@@ -89,7 +94,9 @@ export default function Dashboard() {
               <div className="row gap-sm wrap">
                 <span className={`badge badge-${daily.challenge.difficulty === 'Easy' ? 'success' : 'warn'}`}>{daily.challenge.difficulty}</span>
                 <span className="badge">{daily.challenge.topic}</span>
-                <span className="badge">👥 {daily.solvers} solved today</span>
+                <span className="badge">
+                  <Users size={12} /> {daily.solvers} solved today
+                </span>
               </div>
               <p className="clamp-3">{daily.challenge.statement}</p>
               <button className="btn btn-primary" onClick={() => navigate('/editor', { state: { daily: true } })}>
@@ -100,7 +107,9 @@ export default function Dashboard() {
         </div>
 
         <div className="card">
-          <h2>📈 Your XP this week</h2>
+          <h2 className="h-ico">
+            <TrendingUp size={18} /> Your XP this week
+          </h2>
           <div style={{ height: 220 }}>
             <ResponsiveContainer>
               <BarChart data={week}>
@@ -123,26 +132,39 @@ export default function Dashboard() {
 
       <div className="grid-2">
         <div className="card">
-          <h2>🚀 Quick actions</h2>
+          <h2 className="h-ico">
+            <Rocket size={18} /> Quick actions
+          </h2>
           <div className="quick-grid">
-            <Link to="/tutor" className="quick">🤖<span>Ask AI Tutor</span></Link>
-            <Link to="/editor" className="quick">💻<span>Open Editor</span></Link>
-            <Link to="/projects" className="quick">👥<span>Team Projects</span></Link>
-            <Link to="/quiz" className="quick">🧠<span>Take a Quiz</span></Link>
-            <Link to="/roadmaps" className="quick">🗺️<span>Roadmaps</span></Link>
-            <Link to="/community" className="quick">💬<span>Community</span></Link>
+            {[
+              ['/tutor', Bot, 'Ask AI Tutor'],
+              ['/editor', Code2, 'Open Editor'],
+              ['/projects', Users, 'Team Projects'],
+              ['/quiz', Brain, 'Take a Quiz'],
+              ['/learning-paths', Map, 'Learning Paths'],
+              ['/profile', User, 'My Progress'],
+            ].map(([to, Icon, label]) => (
+              <Link key={to} to={to} className="quick">
+                <Icon size={24} strokeWidth={1.7} />
+                <span>{label}</span>
+              </Link>
+            ))}
           </div>
         </div>
         <div className="card">
           <div className="row between">
-            <h2>🏆 Top this week</h2>
-            <Link to="/leaderboard" className="small">See all →</Link>
+            <h2 className="h-ico">
+              <Trophy size={18} /> Top this week
+            </h2>
+            <Link to="/leaderboard" className="small row gap-sm">
+              See all <ArrowRight size={14} />
+            </Link>
           </div>
           {board.length === 0 && <p className="muted">No XP earned yet this week. Be the first!</p>}
           <ol className="mini-board">
             {board.map((b, i) => (
               <li key={b.id} className={b.id === user.id ? 'me-row' : ''}>
-                <span className="rank">{['🥇', '🥈', '🥉'][i] || i + 1}</span>
+                <span className={`rank r${i + 1}`}>{i + 1}</span>
                 <Avatar name={b.name} size={28} />
                 <span className="grow">{b.name}</span>
                 <strong>{b.xp} XP</strong>

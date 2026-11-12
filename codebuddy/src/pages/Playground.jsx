@@ -7,6 +7,7 @@ import { LANGUAGES, langById } from '../lib/constants';
 import CodeEditor from '../components/CodeEditor';
 import Markdown from '../components/Markdown';
 import Spinner from '../components/Spinner';
+import { Scale, Target, X, Lightbulb, CircleCheck, CircleX, ListOrdered, Gauge, Play, Sparkles } from 'lucide-react';
 
 export default function Playground() {
   const location = useLocation();
@@ -82,7 +83,7 @@ export default function Playground() {
     <div className="page page-full">
       <div className="page-head">
         <div>
-          <h1>💻 Code Editor</h1>
+          <h1>Code Editor</h1>
           <p className="muted">Write, run and fix code in your browser. Python, Java, C, C++ and JavaScript supported.</p>
         </div>
         <div className="tabs inline">
@@ -90,7 +91,7 @@ export default function Playground() {
             Editor
           </button>
           <button className={tab === 'compare' ? 'active' : ''} onClick={() => setTab('compare')}>
-            ⚖️ Compare solutions
+            <Scale size={15} /> Compare solutions
           </button>
         </div>
       </div>
@@ -102,9 +103,11 @@ export default function Playground() {
           {showDaily && (
             <aside className="card daily-panel">
               <div className="row between">
-                <h3>🎯 Daily challenge</h3>
+                <h3 className="h-ico">
+                  <Target size={17} /> Daily challenge
+                </h3>
                 <button className="icon-btn tiny" onClick={() => setShowDaily(false)}>
-                  ✕
+                  <X size={15} />
                 </button>
               </div>
               {!daily ? (
@@ -114,7 +117,7 @@ export default function Playground() {
                   <h4>{daily.challenge.title}</h4>
                   <div className="row gap-sm wrap">
                     <span className="badge">{daily.challenge.difficulty}</span>
-                    {daily.solved && <span className="badge badge-success">Solved ✓</span>}
+                    {daily.solved && <span className="badge badge-success">Solved</span>}
                   </div>
                   <p>{daily.challenge.statement}</p>
                   {daily.challenge.inputFormat && (
@@ -140,7 +143,7 @@ export default function Playground() {
                     </div>
                   ))}
                   <details>
-                    <summary>💡 Hint</summary>
+                    <summary>Hint</summary>
                     <p className="small">{daily.challenge.hint}</p>
                   </details>
                   <button className="btn btn-primary" onClick={submitDaily} disabled={checking}>
@@ -148,7 +151,10 @@ export default function Playground() {
                   </button>
                   {verdict && (
                     <div className={`verdict ${verdict.correct ? 'ok' : 'bad'}`}>
-                      <strong>{verdict.correct ? `✅ Correct!${verdict.xp ? ` +${verdict.xp} XP` : ''}` : '❌ Not quite yet'}</strong>
+                      <strong className="h-ico">
+                        {verdict.correct ? <CircleCheck size={17} /> : <CircleX size={17} />}
+                        {verdict.correct ? `Correct!${verdict.xp ? ` +${verdict.xp} XP` : ''}` : 'Not quite yet'}
+                      </strong>
                       <p className="small">{verdict.feedback}</p>
                     </div>
                   )}
@@ -168,18 +174,18 @@ export default function Playground() {
               </select>
               {!showDaily && (
                 <button className="btn btn-ghost btn-sm" onClick={() => setShowDaily(true)}>
-                  🎯 Daily challenge
+                  <Target size={14} /> Daily challenge
                 </button>
               )}
               <div className="grow" />
               <button className="btn btn-ghost btn-sm" onClick={() => askAI('linebyline')}>
-                📜 Explain
+                <ListOrdered size={14} /> Explain
               </button>
               <button className="btn btn-ghost btn-sm" onClick={() => askAI('optimize')}>
-                ⚡ Optimise
+                <Gauge size={14} /> Optimise
               </button>
               <button className="btn btn-success" onClick={run} disabled={running}>
-                {running ? 'Running…' : '▶ Run'}
+                {running ? 'Running…' : <><Play size={14} /> Run</>}
               </button>
             </div>
             <CodeEditor value={code} onChange={setCode} language={lang} height="min(62vh, 560px)" />
@@ -202,7 +208,7 @@ export default function Playground() {
                 )}
               </div>
               {running && <Spinner label="Running your code…" />}
-              {!running && !result && <p className="muted small">Press ▶ Run to see the output here.</p>}
+              {!running && !result && <p className="muted small">Press Run to see the output here.</p>}
               {result && (
                 <>
                   {result.stdout && <pre className="out">{result.stdout}</pre>}
@@ -213,7 +219,7 @@ export default function Playground() {
                       className="btn btn-primary btn-block"
                       onClick={() => askAI('debug', `\n\nError message:\n\`\`\`\n${errorText.slice(0, 3000)}\n\`\`\``)}
                     >
-                      🤖 Fix with CodeBuddy
+                      <Sparkles size={15} /> Fix with CodeBuddy
                     </button>
                   )}
                 </>
@@ -255,7 +261,7 @@ function Compare({ lang, setLang, level }) {
         <span className="muted small">Paste two solutions to the same problem – CodeBuddy tells you which is better and why.</span>
         <div className="grow" />
         <button className="btn btn-primary" onClick={compare} disabled={busy || !a.trim() || !b.trim()}>
-          {busy ? 'Comparing…' : '⚖️ Compare'}
+          {busy ? 'Comparing…' : <><Scale size={15} /> Compare</>}
         </button>
       </div>
       <div className="grid-2">

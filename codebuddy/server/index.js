@@ -11,7 +11,6 @@ import { authRouter, requireAuth } from './auth.js';
 import { initSocket } from './socket.js';
 import { tutorRouter } from './routes/tutor.js';
 import { projectsRouter } from './routes/projects.js';
-import { communityRouter } from './routes/community.js';
 import { learnRouter } from './routes/learn.js';
 
 const PORT = process.env.PORT || 5000;
@@ -48,7 +47,6 @@ app.use('/api', requireAuth); // everything below requires a valid JWT
 app.use(['/api/tutor/ask', '/api/tutor/compare', '/api/quiz', '/api/daily/check'], aiLimiter);
 app.use('/api/tutor', tutorRouter);
 app.use('/api/projects', projectsRouter);
-app.use('/api/community', communityRouter);
 app.use('/api', learnRouter);
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 

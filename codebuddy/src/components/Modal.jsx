@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Sparkles, X } from 'lucide-react';
 
 export default function Modal({ title, onClose, children, width = 480 }) {
   useEffect(() => {
@@ -12,7 +13,7 @@ export default function Modal({ title, onClose, children, width = 480 }) {
         <div className="modal-head">
           <h3>{title}</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
-            ✕
+            <X size={18} />
           </button>
         </div>
         {children}
@@ -21,10 +22,12 @@ export default function Modal({ title, onClose, children, width = 480 }) {
   );
 }
 
-export function Empty({ icon = '✨', title, children }) {
+export function Empty({ icon: Icon = Sparkles, title, children }) {
   return (
     <div className="empty">
-      <div className="empty-icon">{icon}</div>
+      <div className="empty-icon">
+        <Icon size={30} strokeWidth={1.6} />
+      </div>
       <h3>{title}</h3>
       {children && <p className="muted">{children}</p>}
     </div>
