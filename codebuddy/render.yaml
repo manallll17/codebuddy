@@ -1,0 +1,24 @@
+# Render Blueprint – deploys CodeBuddy (React + Express + Socket.io) as one web service.
+services:
+  - type: web
+    name: codebuddy
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: APP_TZ
+        value: Asia/Kolkata
